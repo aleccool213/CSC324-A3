@@ -12,7 +12,7 @@ module Mutation (
     )
     where
 
-import AList (AList, lookupA, insertA, updateA)
+import AList (AList, lookupA, insertA, updateA, inA)
 
 -- A type representing the possible values stored in memory.
 data Value = IntVal Integer |
@@ -40,12 +40,31 @@ class Mutable a where
     -- Raise an error if the input Integer is already storing a value.
     def :: Memory -> Integer -> a -> (Pointer a, Memory)
 
+-- Question 2
+
+get_bool (BoolVal value) = value
+
 instance Mutable Bool where
-    get mem pointer = Nothing
-    set mem pointer = Nothing
-    def mem int val = Nothing
+    get mem (P pointer_val) = if inA mem pointer_val then (get_bool (lookupA mem pointer_val))
+                              else error "pointer value not in memory!"
+
+    set mem (P pointer_val) value = updateA mem (pointer_val, (BoolVal value))
+    def mem pointer_val value = if inA mem pointer_val then error "Already in Memory!"
+                                else
+                                (
+                                  (P pointer_val),
+                                  insertA mem (pointer_val, (BoolVal value))
+                                )
+
+get_integer (IntVal value) = value
 
 instance Mutable Integer where
-    get mem pointer = Nothing
-    set mem pointer = Nothing
-    def mem int val = Nothing
+  get mem (P pointer_val) = if inA mem pointer_val then (get_integer (lookupA mem pointer_val))
+                           else error "pointer value not in memory!"
+  set mem (P pointer_val) value = updateA mem (pointer_val, (IntVal value))
+  def mem pointer_val value = if inA mem pointer_val then error "Already in Memory!"
+                              else
+                              (
+                                (P pointer_val),
+                                insertA mem (pointer_val, (IntVal value))
+                              )

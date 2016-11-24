@@ -7,13 +7,15 @@ module AList (
     AList,
     lookupA,
     insertA,
-    updateA
+    updateA,
+    inA,
     )
     where
 
 
 type AList a b = [(a, b)]
 
+-- | Returns True if the key a is in Alist
 inA :: Eq a => AList a b -> a -> Bool
 inA alist key = if (length (filter (\x -> (fst x) == key) alist)) > 0 then True else False
 

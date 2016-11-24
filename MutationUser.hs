@@ -7,6 +7,8 @@ import Mutation (
     get, set, def, Mutable, Pointer, Memory
     )
 
+-- Question 3
+
 -- | Takes a number <n> and memory, and stores two new values in memory:
 --   - the integer (n + 3) at location 100
 --   - the boolean (n > 0) at location 500
@@ -14,4 +16,3 @@ import Mutation (
 --   You may assume these locations are not already used by the memory.
 pointerTest :: Integer -> Memory -> ((Pointer Integer, Pointer Bool), Memory)
 pointerTest = undefined
-
