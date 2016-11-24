@@ -7,7 +7,8 @@ which you will use as the data structure for storing "mutable" data.
 -- **YOU MUST ADD ALL FUNCTIONS AND TYPES TO THIS LIST AS YOU CREATE THEM!!**
 module Mutation (
     Mutable, get, set, def,
-    Memory, Pointer
+    Memory, Pointer,
+    Value,
     )
     where
 
@@ -38,3 +39,13 @@ class Mutable a where
     -- and the new memory with the new value.
     -- Raise an error if the input Integer is already storing a value.
     def :: Memory -> Integer -> a -> (Pointer a, Memory)
+
+instance Mutable Bool where
+    get mem pointer = Nothing
+    set mem pointer = Nothing
+    def mem int val = Nothing
+
+instance Mutable Integer where
+    get mem pointer = Nothing
+    set mem pointer = Nothing
+    def mem int val = Nothing
