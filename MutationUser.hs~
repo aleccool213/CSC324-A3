@@ -4,7 +4,11 @@ This file contains code which uses the mutation library found in Mutation.hs
 -}
 
 import Mutation (
+<<<<<<< HEAD
     get, set, def, Mutable, Pointer, Memory, StateOp, >>>, >~>
+=======
+    get, set, def, Mutable, Pointer, Memory, StateOp
+>>>>>>> 71fc7df04f344f852b81b9535ceb12c7b6197e00
     )
 
 -- Question 3

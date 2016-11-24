@@ -1,5 +1,4 @@
 {- Assignment 3 - Memory and Mutation
-
 This file contains the code responsible for working with association lists,
 which you will use as the data structure for storing "mutable" data.
 -}
@@ -8,7 +7,7 @@ which you will use as the data structure for storing "mutable" data.
 module Mutation (
     Mutable, get, set, def,
     Memory, Pointer,
-    Value, StateOp, >>>, >~>
+    Value, StateOp,
     )
     where
 
