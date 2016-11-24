@@ -4,7 +4,7 @@ This file contains code which uses the mutation library found in Mutation.hs
 -}
 
 import Mutation (
-    get, set, def, Mutable, Pointer, Memory
+    get, set, def, Mutable, Pointer, Memory, StateOp
     )
 
 -- Question 3
