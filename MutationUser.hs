@@ -4,7 +4,7 @@ This file contains code which uses the mutation library found in Mutation.hs
 -}
 
 import Mutation (
-    get, set, def, Mutable, Pointer, Memory
+    get, set, def, Mutable, Pointer, Memory, StateOp, >>>, >~>
     )
 
 -- Question 3
@@ -20,9 +20,11 @@ pointerTest value = def 100 (value + 3) >~> \x ->
                         get x >>> get y
 
 swap :: Mutable a => Pointer a -> Pointer a -> StateOp ()
-swap Pointer a Pointer b = let x = get a
-				set a (get b)
-				set b x
+swap (P a) (P b) = let x = fst (get a)
+					set a (fst (get b))
+					set b x
+			in StateOp (\mem -> ((), mem))
 
 swapCycle :: Mutable a => [Pointer a] -> StateOp ()
+swapCycle = Nothing
 

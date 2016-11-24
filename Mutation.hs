@@ -8,7 +8,7 @@ which you will use as the data structure for storing "mutable" data.
 module Mutation (
     Mutable, get, set, def,
     Memory, Pointer,
-    Value,
+    Value, StateOp, >>>, >~>
     )
     where
 
