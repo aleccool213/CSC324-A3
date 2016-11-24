@@ -91,3 +91,18 @@ instance Mutable Integer where
                               )
                             )
                           )
+
+-- Question 4
+
+(>>>) :: StateOp a -> StateOp b -> StateOp b
+(StateOp op1) >>> (StateOp op2) = (StateOp (\mem -> let (_, s1) = op1 mem in op2 s1))
+
+-- (>~>) :: StateOp a -> (a -> StateOp b) -> StateOp b
+-- ((StateOp f) >~> g) s = let (x, s1) = f s
+--                             newStackOp = f x
+--                         in newStackOp s1
+
+-- Question 5
+
+returnVal :: a -> StateOp a
+returnVal a = (StateOp (\mem -> (a, mem)))
