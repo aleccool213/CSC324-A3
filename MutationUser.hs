@@ -14,7 +14,15 @@ import Mutation (
 --   - the boolean (n > 0) at location 500
 --   Return the pointer to each stored value, and the new memory.
 --   You may assume these locations are not already used by the memory.
-pointerTest :: Integer -> Memory -> ((Pointer Integer, Pointer Bool), Memory)
-pointerTest value mem = let x = def mem 100 (value + 3)
-                            y = def (snd x) 500 (if value > 0 then True else False)
-                        in (((fst x), (fst y)), (snd y))
+pointerTest :: Integer -> StateOp a -> StateOp a
+pointerTest value = def 100 (value + 3) >~> \x ->
+                            def 500 (if value > 0 then True else False) >~> \y ->
+                        get x >>> get y
+
+swap :: Mutable a => Pointer a -> Pointer a -> StateOp ()
+swap Pointer a Pointer b = let x = get a
+				set a (get b)
+				set b x
+
+swapCycle :: Mutable a => [Pointer a] -> StateOp ()
+
