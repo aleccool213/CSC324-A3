@@ -15,4 +15,6 @@ import Mutation (
 --   Return the pointer to each stored value, and the new memory.
 --   You may assume these locations are not already used by the memory.
 pointerTest :: Integer -> Memory -> ((Pointer Integer, Pointer Bool), Memory)
-pointerTest = undefined
+pointerTest value mem = let x = def mem 100 (value + 3)
+                            y = def (snd x) 500 (if value > 0 then True else False)
+                        in (((fst x), (fst y)), (snd y))

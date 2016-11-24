@@ -47,7 +47,6 @@ get_bool (BoolVal value) = value
 instance Mutable Bool where
     get mem (P pointer_val) = if inA mem pointer_val then (get_bool (lookupA mem pointer_val))
                               else error "pointer value not in memory!"
-
     set mem (P pointer_val) value = updateA mem (pointer_val, (BoolVal value))
     def mem pointer_val value = if inA mem pointer_val then error "Already in Memory!"
                                 else
