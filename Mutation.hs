@@ -7,8 +7,9 @@ which you will use as the data structure for storing "mutable" data.
 -- **YOU MUST ADD ALL FUNCTIONS AND TYPES TO THIS LIST AS YOU CREATE THEM!!**
 module Mutation (
     Mutable, get, set, def,
-    Memory, Pointer,
-    Value, StateOp,
+    Memory, Pointer(..),
+    Value(..), StateOp(..),
+    (>~>), (>>>), returnVal
     )
     where
 
@@ -50,7 +51,7 @@ class Mutable a where
     -- and the new memory with the new value.
     -- Raise an error if the input Integer is already storing a value.
     -- def :: Memory -> Integer -> a -> (Pointer a, Memory)
-    def :: Integer -> a -> StateOp a
+    def :: Integer -> a -> StateOp (Pointer a)
 
 -- Question 2
 
@@ -67,7 +68,7 @@ instance Mutable Bool where
                                 if inA mem pointer_val then error "Already in Memory!"
                                 else
                                 (
-                                  value,
+                                  (P pointer_val),
                                   insertA mem (pointer_val, (BoolVal value))
                                 )
                               )
@@ -86,7 +87,7 @@ instance Mutable Integer where
                               if inA mem pointer_val then error "Already in Memory!"
                               else
                               (
-                                value,
+                                (P pointer_val),
                                 insertA mem (pointer_val, (IntVal value))
                               )
                             )
@@ -97,10 +98,11 @@ instance Mutable Integer where
 (>>>) :: StateOp a -> StateOp b -> StateOp b
 (StateOp op1) >>> (StateOp op2) = (StateOp (\mem -> let (_, s1) = op1 mem in op2 s1))
 
--- (>~>) :: StateOp a -> (a -> StateOp b) -> StateOp b
--- ((StateOp f) >~> g) s = let (x, s1) = f s
---                             newStackOp = f x
---                         in newStackOp s1
+(>~>) :: StateOp a -> (a -> StateOp b) -> StateOp b
+(StateOp f) >~> g = (StateOp (\mem -> let (x, s1) = f mem
+                                          (StateOp newStateOp) = g x
+                                      in newStateOp s1)
+                    )
 
 -- Question 5
 

@@ -4,9 +4,9 @@ import Test.HUnit
 import Mutation (
     Memory, Pointer(..), Value(..),
     Mutable, get, set, def,
-    StateOp(..)
+    StateOp(..),
     (>>>), (>~>), returnVal,
-    alloc, free)
+    )
 import Data.List (sortBy, intersect, nub)
 
 -- helper to run a StateOp
@@ -42,31 +42,31 @@ p3 = P 3
 mutableTests :: Test
 mutableTests = TestList [
     (10, testMem) ~=? run (get p1) testMem,
-    (True, testMem) ~=? run (get p3) testMem
-    -- [(1, IntVal 20), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False)] ~=?
-    --     sortMem (run (set p1 20) testMem),
-    -- [(1, IntVal 10), (2, IntVal 30), (3, BoolVal False), (4, BoolVal False)] ~=?
-    --     sortMem (run (set p3 False) testMem),
-    -- [(1, IntVal 10), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False),
-    --  (100, IntVal 42)] ~=? sortMem (run (def 100 (42 :: Integer)) testMem),
-    -- [(1, IntVal 10), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False),
-    --  (100, BoolVal False)] ~=? sortMem (run (def 100 False) testMem)
+    (True, testMem) ~=? run (get p3) testMem,
+    [(1, IntVal 20), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False)] ~=?
+        sortMem (run (set p1 20) testMem),
+    [(1, IntVal 10), (2, IntVal 30), (3, BoolVal False), (4, BoolVal False)] ~=?
+        sortMem (run (set p3 False) testMem),
+    [(1, IntVal 10), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False),
+     (100, IntVal 42)] ~=? sortMem (run (def 100 (42 :: Integer)) testMem),
+    [(1, IntVal 10), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False),
+     (100, BoolVal False)] ~=? sortMem (run (def 100 False) testMem)
     ]
 
--- chainTests :: Test
--- chainTests =
---     let set2 = set p1 0 >>> set p3 False
---         defGet = def 100 (42 :: Integer) >~> \p -> get p
---     in
---         TestList [
---             [(1, IntVal 0), (2, IntVal 30),
---              (3, BoolVal False), (4, BoolVal False)] ~=?
---             sortMem (run set2 testMem),
---             42 ~=? fst (run defGet testMem),
---             [(1, IntVal 10), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False),
---              (100, IntVal 42)] ~=? sortMem (run defGet testMem),
---             ("hello, world!", testMem) ~=? run (returnVal "hello, world!") testMem
---         ]
+chainTests :: Test
+chainTests =
+    let set2 = set p1 0 >>> set p3 False
+        defGet = def 100 (42 :: Integer) >~> \p -> get p
+    in
+        TestList [
+            [(1, IntVal 0), (2, IntVal 30),
+             (3, BoolVal False), (4, BoolVal False)] ~=?
+            sortMem (run set2 testMem),
+            42 ~=? fst (run defGet testMem),
+            [(1, IntVal 10), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False),
+             (100, IntVal 42)] ~=? sortMem (run defGet testMem),
+            ("hello, world!", testMem) ~=? run (returnVal "hello, world!") testMem
+        ]
 --
 -- safetyTests :: Test
 -- safetyTests =
@@ -86,7 +86,7 @@ mutableTests = TestList [
 main :: IO ()
 main = do
     printCount "mutableTests" mutableTests
-    -- printCount "chainTests" chainTests
+    printCount "chainTests" chainTests
     -- printCount "safetyTests" safetyTests
     -- Uncomment these to see more detailed test results.
     -- (Format's a little ugly, though.)
