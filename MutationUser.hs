@@ -29,5 +29,11 @@ swap a b = let (StateOp x) = get a
                (StateOp y) = get b
            in  (set a val) >>> (set b val)
 
+-- swap :: Mutable a => Pointer a -> Pointer a -> StateOp ()
+-- swap (P a) (P b) = let x = fst (get a)
+-- 					set a (fst (get b))
+-- 					set b x
+-- 			in StateOp (\mem -> ((), mem))
+
 -- swapCycle :: Mutable a => [Pointer a] -> StateOp ()
 -- swapCycle = undefined

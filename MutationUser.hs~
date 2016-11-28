@@ -4,7 +4,11 @@ This file contains code which uses the mutation library found in Mutation.hs
 -}
 
 import Mutation (
-    get, set, def, Mutable, Pointer, Memory
+<<<<<<< HEAD
+    get, set, def, Mutable, Pointer, Memory, StateOp, >>>, >~>
+=======
+    get, set, def, Mutable, Pointer, Memory, StateOp
+>>>>>>> 71fc7df04f344f852b81b9535ceb12c7b6197e00
     )
 
 -- Question 3
@@ -14,7 +18,17 @@ import Mutation (
 --   - the boolean (n > 0) at location 500
 --   Return the pointer to each stored value, and the new memory.
 --   You may assume these locations are not already used by the memory.
-pointerTest :: Integer -> Memory -> ((Pointer Integer, Pointer Bool), Memory)
-pointerTest value mem = let x = def mem 100 (value + 3)
-                            y = def (snd x) 500 (if value > 0 then True else False)
-                        in (((fst x), (fst y)), (snd y))
+pointerTest :: Integer -> StateOp a -> StateOp a
+pointerTest value = def 100 (value + 3) >~> \x ->
+                            def 500 (if value > 0 then True else False) >~> \y ->
+                        get x >>> get y
+
+swap :: Mutable a => Pointer a -> Pointer a -> StateOp ()
+swap (P a) (P b) = let x = fst (get a)
+					set a (fst (get b))
+					set b x
+			in StateOp (\mem -> ((), mem))
+
+swapCycle :: Mutable a => [Pointer a] -> StateOp ()
+swapCycle = Nothing
+
