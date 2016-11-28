@@ -1,4 +1,4 @@
-{{- Assignment 3 - Memory and Mutation
+{- Assignment 3 - Memory and Mutation
 This file contains the code responsible for working with association lists,
 which you will use as the data structure for storing "mutable" data.
 -}
