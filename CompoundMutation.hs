@@ -3,7 +3,7 @@ This file contains the code responsible for working with PART 5
 -}
 
 -- **YOU MUST ADD ALL FUNCTIONS AND TYPES TO THIS LIST AS YOU CREATE THEM!!**
-module Mutation (
+module CompoundMutation (
     Mutable, get, set, def,
     Memory, Pointer(..),
     Value(..), StateOp(..),
