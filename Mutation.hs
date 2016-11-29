@@ -8,11 +8,11 @@ module Mutation (
     Mutable, get, set, def,
     Memory, Pointer(..),
     Value(..), StateOp(..),
-    (>~>), (>>>), returnVal
+    (>~>), (>>>), returnVal, alloc
     )
     where
 
-import AList (AList, lookupA, insertA, updateA, inA)
+import AList (AList, lookupA, insertA, updateA, inA, getKeys)
 
 -- A type representing the possible values stored in memory.
 data Value = IntVal Integer |
@@ -52,6 +52,10 @@ class Mutable a where
     -- def :: Memory -> Integer -> a -> (Pointer a, Memory)
     def :: Integer -> a -> StateOp (Pointer a)
 
+    -- Question 7
+
+    alloc :: a -> StateOp (Pointer a)
+
 -- Question 2
 
 get_bool (BoolVal value) = value
@@ -73,6 +77,16 @@ instance Mutable Bool where
                               )
                             )
 
+    alloc value = (StateOp
+                    (\mem ->
+                      let keys = getKeys mem
+                          maxmi = (maximum keys + 1)
+                          (StateOp f) = def maxmi value
+                          (k, newMem) = f mem
+                      in (k, newMem)
+                    )
+                  )
+
 get_integer (IntVal value) = value
 
 instance Mutable Integer where
@@ -91,6 +105,16 @@ instance Mutable Integer where
                               )
                             )
                           )
+
+  alloc value = (StateOp
+                  (\mem ->
+                    let keys = getKeys mem
+                        maxmi = (maximum keys + 1)
+                        (StateOp f) = def maxmi value
+                        (k, newMem) = f mem
+                    in (k, newMem)
+                  )
+                )
 
 -- Question 4
 

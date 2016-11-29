@@ -9,11 +9,15 @@ module AList (
     insertA,
     updateA,
     inA,
+    getKeys,
     )
     where
 
 
 type AList a b = [(a, b)]
+
+getKeys :: AList a b -> [a]
+getKeys alist = map (\x -> (fst x)) alist
 
 -- | Returns True if the key a is in Alist
 inA :: Eq a => AList a b -> a -> Bool
