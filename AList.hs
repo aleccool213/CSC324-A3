@@ -10,14 +10,19 @@ module AList (
     updateA,
     inA,
     getKeys,
+    removeA,
     )
     where
 
 
 type AList a b = [(a, b)]
 
+
+getKeysHelper (a, b) = b
+getKeysHelper a = a
+
 getKeys :: AList a b -> [a]
-getKeys alist = map (\x -> (fst x)) alist
+getKeys alist = map (\x -> (getKeysHelper (fst x))) alist
 
 -- | Returns True if the key a is in Alist
 inA :: Eq a => AList a b -> a -> Bool
@@ -45,3 +50,12 @@ updateA alist (key, val) = foldl
                               )
                               []
                               alist
+
+-- | Returns AList with key removed from the list
+removeA :: Eq a => AList a b -> a -> AList a b
+removeA alist key = foldl
+                    (\result current ->
+                      if (fst current) == key then result else result ++ [current]
+                    )
+                    []
+                    alist

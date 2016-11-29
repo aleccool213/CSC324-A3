@@ -5,7 +5,7 @@ import Mutation (
     Memory, Pointer(..), Value(..),
     Mutable, get, set, def,
     StateOp(..),
-    (>>>), (>~>), returnVal, alloc
+    (>>>), (>~>), returnVal, alloc, free
     )
 import Data.List (sortBy, intersect, nub)
 
@@ -78,9 +78,9 @@ safetyTests =
         -- Check that 42 has indeed been inserted (and no other values changed)
         5 ~=? length (intersect [IntVal 10, IntVal 30, BoolVal True, BoolVal False,
                                  IntVal 42]
-                                (map snd newMem))
-        -- [(1, IntVal 10), (2, IntVal 30), (4, BoolVal False)] ~=?
-        --     sortMem (run (free p3) testMem)
+                                (map snd newMem)),
+        [(1, IntVal 10), (2, IntVal 30), (4, BoolVal False)] ~=?
+            sortMem (run (free p3) testMem)
     ]
 
 main :: IO ()
