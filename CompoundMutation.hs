@@ -148,57 +148,56 @@ returnVal a = (StateOp (\mem -> (a, mem)))
 data Person = Person Integer Bool deriving Show
 
 -- Stores a pointer to age and isStudent
-data Pointer a b = PersonPointer Integer Integer
+-- data Pointer a b = PersonPointer Integer Integer
 
--- for every person we have three pointers, one pointer for age, one pointer for isStudent
--- and one pointer which is a tuple === ((age_pointer, isStudent_pointer), 0)
+-- for every person we have two pointers, one pointer for age, one pointer for isStudent
+-- we just plus 1 to get pointer for isStudent
 instance Mutable Person where
-  get (PersonPointer age_pointer isStudent_pointer) = (StateOp (\mem ->
-                                    (if (and (inA mem age_pointer) (inA mem isStudent_pointer)) then
-                                     ((get_integer (lookupA mem age_pointer)), (get_bool (lookupA mem isStudent_pointer)))
-                                     else error "pointer value not in memory!",
+  get (P pointer_val) = (StateOp (\mem ->
+                                    (
+                                      if ((inA mem pointer_val) && (inA mem (pointer_val + 1))) then
+                                         Person (get_integer (lookupA mem pointer_val)) (get_bool (lookupA mem (pointer_val + 1)))
+                                         else error "pointer value not in memory!",
                                      mem
                                     )
                                  )
                         )
-  set a b = StateOp (\mem -> (a, mem))
+  set a (Person age isStudent) = StateOp (\mem -> ((Person age isStudent), mem))
   -- returns the pointer to person_obj once stored in mem/stateop
   -- assumes no pointer at pointer_val and pointer_val + 1
-  def (P pointer_value) (Person age isStudent) = (StateOp
+  def pointer_val (Person age isStudent) = (StateOp
                                                   (\mem ->
-                                                    if inA mem pointer_val then error "Already in Memory!"
-                                                    else
-                                                    -- insert
-                                                    let mem2 = insertA mem ((pointer_val, (pointer_value + 1)), 0)
-                                                        mem3 = insertA mem2 (pointer_val, age)
-                                                        mem4 = insertA mem3 (pointer_val + 1, isStudent)
-                                                    in (
-                                                         (PersonPointer pointer_val, pointer_val + 1),
-                                                         mem4
-                                                       )
-                                                  )
-                                                )
+                                                     if inA mem pointer_val then error "Already in Memory!"
+                                                     else
+                                                     -- insert
+                                                     let memWithAge = insertA mem (pointer_val, (IntVal age))
+                                                         memWithIsStudent = insertA memWithAge (pointer_val + 1, (BoolVal isStudent))
+                                                     in (
+                                                          (P pointer_val),
+                                                          memWithIsStudent
+                                                        )
+                                                    )
+                                                 )
   -- allocate memory for
-  -- TODO: figure out better return value?
   alloc (Person age isStudent) = (StateOp
                                   (\mem ->
                                     let keys = getKeys mem
                                         maxmi = (maximum keys + 1)
-                                        (StateOp h) = def maxmi age >>> def (maxmi + 1) isStudent >>> def (maxmi, maxmi + 1) 0
-                                    in (Pointer maxmi, mem)
+                                        (StateOp h) = def maxmi age >>> def (maxmi + 1) isStudent
+                                    in (P maxmi, mem)
                                   )
                                  )
   -- remove age_pointer and isStudent_pointer
-  free (PersonPointer age_pointer isStudent_pointer) = free age_pointer >>>
-                                                       free isStudent_pointer >>>
-                                                       (StateOp (\mem -> ((), removeA mem (age_pointer, isStudent_pointer))))
+  free pointer_val = free pointer_val >>>
+                        --  free (P (pointer_val + 1)) >>>
+                     (StateOp (\mem -> ((), mem)))
 
 -- Returns a
 (@@) person_pointer attr_func = attr_func person_pointer
 
 -- returns a function which will accept a person_obj and return age
-age :: (PersonPointer a b -> a)
-age = (\person_pointer -> let (PersonPointer age is_student) = person_pointer in age)
+-- age :: (Pointer a b -> a)
+age = (\person_pointer -> person_pointer)
 
-isStudent :: (PersonPointer a b -> b)
-isStudent = (\person_pointer -> let (PersonPointer age is_student) = person_pointer in is_student)
+-- isStudent :: (Pointer a b -> b)
+isStudent = (\person_pointer -> person_pointer + 1)
