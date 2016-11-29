@@ -7,7 +7,8 @@ module CompoundMutation (
     Mutable, get, set, def,
     Memory, Pointer(..),
     Value(..), StateOp(..),
-    (>~>), (>>>), returnVal, alloc, free
+    (>~>), (>>>), returnVal, alloc, free,
+    Person(..), (@@), age, isStudent
     )
     where
 
@@ -60,6 +61,8 @@ class Mutable a where
     free :: Pointer a -> StateOp ()
 
 -- Question 2
+
+get_bool :: Value -> Bool
 
 get_bool (BoolVal value) = value
 
@@ -145,7 +148,7 @@ returnVal a = (StateOp (\mem -> (a, mem)))
 
 --  A type representing a person with two attributes:
 -- age and whether they are a student or not.
-data Person = Person Integer Bool deriving Show
+data Person = Person Integer Bool deriving (Show, Eq)
 
 -- Stores a pointer to age and isStudent
 -- data Pointer a b = PersonPointer Integer Integer
@@ -162,21 +165,27 @@ instance Mutable Person where
                                     )
                                  )
                         )
-  set a (Person age isStudent) = StateOp (\mem -> ((Person age isStudent), mem))
+  set (P a) (Person age isStudent) = (StateOp
+                                   (\mem ->
+                                    let newMemWithAge = updateA mem (a, (IntVal age))
+                                        newMemWithStu = updateA newMemWithAge ((a + 1), (BoolVal isStudent))
+                                    in ((Person age isStudent), newMemWithStu)
+                                   )
+                                 )
   -- returns the pointer to person_obj once stored in mem/stateop
   -- assumes no pointer at pointer_val and pointer_val + 1
   def pointer_val (Person age isStudent) = (StateOp
                                                   (\mem ->
                                                      if inA mem pointer_val then error "Already in Memory!"
                                                      else
-                                                     -- insert
-                                                     let memWithAge = insertA mem (pointer_val, (IntVal age))
-                                                         memWithIsStudent = insertA memWithAge (pointer_val + 1, (BoolVal isStudent))
-                                                     in (
-                                                          (P pointer_val),
-                                                          memWithIsStudent
-                                                        )
-                                                    )
+                                                       -- insert
+                                                       let memWithAge = insertA mem (pointer_val, (IntVal age))
+                                                           memWithIsStudent = insertA memWithAge (pointer_val + 1, (BoolVal isStudent))
+                                                       in (
+                                                            (P pointer_val),
+                                                            memWithIsStudent
+                                                          )
+                                                      )
                                                  )
   -- allocate memory for
   alloc (Person age isStudent) = (StateOp
@@ -196,8 +205,8 @@ instance Mutable Person where
 (@@) person_pointer attr_func = attr_func person_pointer
 
 -- returns a function which will accept a person_obj and return age
--- age :: (Pointer a b -> a)
+age :: (Pointer a -> Pointer a)
 age = (\person_pointer -> person_pointer)
 
--- isStudent :: (Pointer a b -> b)
-isStudent = (\person_pointer -> person_pointer + 1)
+isStudent :: (Pointer a -> Pointer a)
+isStudent = (\person_pointer -> let (P temp) = person_pointer in (P (temp + 1)))
