@@ -47,18 +47,18 @@ swap a b = (StateOp (\mem -> let (StateOp f) = get a
                                  (StateOp h) = set b a_value
                                  (k, newMem3) = h newMem2
                              in ((), newMem3)
-
               )
             )
 
--- takes a list of pointers p1,
--- ..., pn, with corresponding values v1, ..., vn, and sets p1's value to v2, p2's value to v3.,
+-- takes a list of pointers p1, ..., pn, with corresponding values v1, ..., vn,
+-- and sets p1's value to v2, p2's value to v3.,
 -- etc., and pn's value to v1. This function should not change anything if its argument has length
 -- less than 2.
+-- TODO: check the case where pointers are not in order or are completely random
 helper [] = StateOp (\mem -> ((), mem))
 helper [x] = StateOp (\mem -> ((), mem))
 helper (x:y:xs) = swap x y >>> helper (y:xs)
 
 swapCycle :: Mutable a => [Pointer a] -> StateOp ()
-swapCycle pointer_list = if (length pointer_list < 3) then StateOp (\mem -> ((), mem))
+swapCycle pointer_list = if (length pointer_list < 2) then StateOp (\mem -> ((), mem))
                          else helper pointer_list
