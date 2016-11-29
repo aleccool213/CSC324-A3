@@ -12,7 +12,7 @@ module Mutation (
     )
     where
 
-import AList (AList, lookupA, insertA, updateA, inA)
+import AList (AList, lookupA, insertA, updateA, inA, getKeys)
 
 -- A type representing the possible values stored in memory.
 data Value = IntVal Integer |
@@ -52,6 +52,10 @@ class Mutable a where
     -- def :: Memory -> Integer -> a -> (Pointer a, Memory)
     def :: Integer -> a -> StateOp (Pointer a)
 
+    -- Question 7
+
+    alloc :: a -> StateOp (Pointer a)
+
 -- Question 2
 
 get_bool (BoolVal value) = value
@@ -73,6 +77,10 @@ instance Mutable Bool where
                               )
                             )
 
+    alloc value = let keys = getKeys mem
+                      maxmi = (maximum keys + 1)
+                  in def maxmi value
+
 get_integer (IntVal value) = value
 
 instance Mutable Integer where
@@ -91,6 +99,10 @@ instance Mutable Integer where
                               )
                             )
                           )
+
+  alloc value = let keys = getKeys mem
+                    maxmi = (maximum keys + 1)
+                in def maxmi value
 
 -- Question 4
 
