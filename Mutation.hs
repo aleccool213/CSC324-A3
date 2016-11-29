@@ -8,7 +8,7 @@ module Mutation (
     Mutable, get, set, def,
     Memory, Pointer(..),
     Value(..), StateOp(..),
-    (>~>), (>>>), returnVal
+    (>~>), (>>>), returnVal, alloc
     )
     where
 
@@ -77,9 +77,15 @@ instance Mutable Bool where
                               )
                             )
 
-    alloc value = let keys = getKeys mem
-                      maxmi = (maximum keys + 1)
-                  in def maxmi value
+    alloc value = (StateOp
+                    (\mem ->
+                      let keys = getKeys mem
+                          maxmi = (maximum keys + 1)
+                          (StateOp f) = def maxmi value
+                          (k, newMem) = f mem
+                      in (k, newMem)
+                    )
+                  )
 
 get_integer (IntVal value) = value
 
@@ -100,9 +106,15 @@ instance Mutable Integer where
                             )
                           )
 
-  alloc value = let keys = getKeys mem
-                    maxmi = (maximum keys + 1)
-                in def maxmi value
+  alloc value = (StateOp
+                  (\mem ->
+                    let keys = getKeys mem
+                        maxmi = (maximum keys + 1)
+                        (StateOp f) = def maxmi value
+                        (k, newMem) = f mem
+                    in (k, newMem)
+                  )
+                )
 
 -- Question 4
 
