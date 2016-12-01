@@ -89,22 +89,22 @@ testMemPerson :: Memory
 testMemPerson = [(1, IntVal 10), (2, BoolVal True), (3, IntVal 30), (4, BoolVal False)]
 
 p5 :: Pointer Person
-p5 = P 1
+p5 = PersonPointer 1
 
 p6 :: Pointer Person
-p6 = P 3
+p6 = PersonPointer 3
 --
 personTests :: Test
 personTests =
   TestList [
-    ((Person 10 True), testMem) ~=? run (get p5) testMem
-    -- ((Person 30 False), testMem) ~=? run (get p6) testMem,
-    -- [(1, IntVal 12), (2, BoolVal False), (3, IntVal 30), (4, BoolVal False)] ~=?
-    --     sortMem (run (set p5 (Person 12 False)) testMem),
-    -- [(1, IntVal 10), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False),
-    --  (100, IntVal 21), (101, BoolVal True)] ~=? sortMem (run (def 100 (Person 21 True)) testMem)
-    -- [(1, IntVal 10), (2, IntVal 30), (3, BoolVal True), (4, BoolVal False),
-    --  (100, BoolVal False)] ~=? sortMem (run (def 100 False) testMem)
+    ((Person 10 True), testMemPerson) ~=? run (get p5) testMemPerson,
+    ((Person 30 False), testMemPerson) ~=? run (get p6) testMemPerson,
+    [(1, IntVal 12), (2, BoolVal False), (3, IntVal 30), (4, BoolVal False)] ~=?
+        sortMem (run (set p5 (Person 12 False)) testMemPerson),
+    [(1, IntVal 10), (2, BoolVal True), (3, IntVal 30), (4, BoolVal False),
+     (100, IntVal 21), (101, BoolVal True)] ~=? sortMem (run (def 100 (Person 21 True)) testMemPerson),
+    [(1, IntVal 10), (2, BoolVal True), (3, IntVal 30), (4, BoolVal False),
+     (100, BoolVal False)] ~=? sortMem (run (def 100 False) testMemPerson)
   ]
 
 main :: IO ()

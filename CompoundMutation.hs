@@ -24,7 +24,7 @@ data Value = IntVal Integer |
 type Memory = AList Integer Value
 
 -- A type representing a pointer to a location in memory.
-data Pointer a = P Integer
+data Pointer a = P Integer | PersonPointer Integer | AgePointer Integer | StudentPointer Integer
 
 
 -- Question 4
@@ -69,6 +69,8 @@ get_bool (BoolVal value) = value
 instance Mutable Bool where
     get (P pointer_val) = (StateOp (\mem -> (if inA mem pointer_val then (get_bool (lookupA mem pointer_val))
                                              else error "pointer value not in memory!", mem)))
+    get (StudentPointer pointer_val) = (StateOp (\mem -> (if inA mem pointer_val then (get_bool (lookupA mem pointer_val))
+                                                 else error "pointer value not in memory!", mem)))
     set (P pointer_val) value = (StateOp
                                   (\mem -> (value, updateA mem (pointer_val, (BoolVal value))))
                                 )
@@ -94,11 +96,14 @@ instance Mutable Bool where
                   )
 
     free (P pointer_value) = (StateOp (\mem -> ((), removeA mem pointer_value)))
+    free (StudentPointer pointer_value) = (StateOp (\mem -> ((), removeA mem pointer_value)))
 
 get_integer (IntVal value) = value
 
 instance Mutable Integer where
   get (P pointer_val) = (StateOp (\mem -> (if inA mem pointer_val then (get_integer (lookupA mem pointer_val))
+                                           else error "pointer value not in memory!", mem)))
+  get (AgePointer pointer_val) = (StateOp (\mem -> (if inA mem pointer_val then (get_integer (lookupA mem pointer_val))
                                            else error "pointer value not in memory!", mem)))
   set (P pointer_val) value = (StateOp
                                 (\mem -> (value, updateA mem (pointer_val, (IntVal value))))
@@ -125,6 +130,7 @@ instance Mutable Integer where
                 )
 
   free (P pointer_value) = (StateOp (\mem -> ((), removeA mem pointer_value)))
+  free (AgePointer pointer_value) = (StateOp (\mem -> ((), removeA mem pointer_value)))
 
 -- Question 4
 
@@ -156,22 +162,22 @@ data Person = Person Integer Bool deriving (Show, Eq)
 -- for every person we have two pointers, one pointer for age, one pointer for isStudent
 -- we just plus 1 to get pointer for isStudent
 instance Mutable Person where
-  get (P pointer_val) = (StateOp (\mem ->
-                                    (
-                                      if ((inA mem pointer_val) && (inA mem (pointer_val + 1))) then
-                                         Person (get_integer (lookupA mem pointer_val)) (get_bool (lookupA mem (pointer_val + 1)))
-                                         else error "pointer value not in memory!",
-                                     mem
+  get (PersonPointer pointer_val) = (StateOp (\mem ->
+                                                (
+                                                  if ((inA mem pointer_val) && (inA mem (pointer_val + 1))) then
+                                                     Person (get_integer (lookupA mem pointer_val)) (get_bool (lookupA mem (pointer_val + 1)))
+                                                     else error "pointer value not in memory!",
+                                                 mem
+                                                )
+                                             )
                                     )
-                                 )
-                        )
-  set (P a) (Person age isStudent) = (StateOp
-                                   (\mem ->
-                                    let newMemWithAge = updateA mem (a, (IntVal age))
-                                        newMemWithStu = updateA newMemWithAge ((a + 1), (BoolVal isStudent))
-                                    in ((Person age isStudent), newMemWithStu)
-                                   )
-                                 )
+  set (PersonPointer a) (Person age isStudent) = (StateOp
+                                                   (\mem ->
+                                                    let newMemWithAge = updateA mem (a, (IntVal age))
+                                                        newMemWithStu = updateA newMemWithAge ((a + 1), (BoolVal isStudent))
+                                                    in ((Person age isStudent), newMemWithStu)
+                                                   )
+                                                 )
   -- returns the pointer to person_obj once stored in mem/stateop
   -- assumes no pointer at pointer_val and pointer_val + 1
   def pointer_val (Person age isStudent) = (StateOp
@@ -182,7 +188,7 @@ instance Mutable Person where
                                                        let memWithAge = insertA mem (pointer_val, (IntVal age))
                                                            memWithIsStudent = insertA memWithAge (pointer_val + 1, (BoolVal isStudent))
                                                        in (
-                                                            (P pointer_val),
+                                                            (PersonPointer pointer_val),
                                                             memWithIsStudent
                                                           )
                                                       )
@@ -193,20 +199,24 @@ instance Mutable Person where
                                     let keys = getKeys mem
                                         maxmi = (maximum keys + 1)
                                         (StateOp h) = def maxmi age >>> def (maxmi + 1) isStudent
-                                    in (P maxmi, mem)
+                                    in (PersonPointer maxmi, mem)
                                   )
                                  )
   -- remove age_pointer and isStudent_pointer
-  free pointer_val = free pointer_val >>>
-                        --  free (P (pointer_val + 1)) >>>
-                     (StateOp (\mem -> ((), mem)))
+  free (PersonPointer pointer_val) = (StateOp (\mem ->
+                                                  let memWithoutAge = removeA mem pointer_val
+                                                      memWithoutStudent = removeA mem (pointer_val + 1)
+                                                  in ((), memWithoutStudent))
+                                       )
+
 
 -- Returns a
+(@@) :: Pointer a -> (Pointer a -> Pointer b) -> Pointer b
 (@@) person_pointer attr_func = attr_func person_pointer
 
 -- returns a function which will accept a person_obj and return age
-age :: (Pointer a -> Pointer a)
-age = (\person_pointer -> person_pointer)
+age :: (Pointer a -> Pointer b)
+age = (\person_pointer -> let (PersonPointer temp) = person_pointer in AgePointer temp)
 
-isStudent :: (Pointer a -> Pointer a)
-isStudent = (\person_pointer -> let (P temp) = person_pointer in (P (temp + 1)))
+isStudent :: (Pointer a -> Pointer b)
+isStudent = (\person_pointer -> let (PersonPointer temp) = person_pointer in (StudentPointer (temp + 1)))
